@@ -6,8 +6,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.alephany.fontpad.ui.KeyboardKey
+import dev.alephany.fontpad.R
 
 /**
  * Top bezel of the keyboard containing the clipboard button and spacing.
@@ -30,9 +32,8 @@ internal fun KeyboardBezel(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Clipboard button
         KeyboardKey(
-            text = "📋",
+            icon = painterResource(id = R.drawable.ic_clipboard),
             modifier = Modifier.size(48.dp),
             isSpecialKey = true,
             onClick = onClipboardClick

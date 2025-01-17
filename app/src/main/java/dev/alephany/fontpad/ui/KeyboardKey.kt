@@ -2,12 +2,14 @@ package dev.alephany.fontpad.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 
 /**
@@ -21,8 +23,9 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun KeyboardKey(
-    text: String,
     modifier: Modifier = Modifier,
+    text: String? = null,
+    icon: Painter? = null,
     isSpecialKey: Boolean = false,
     isActive: Boolean = false,
     onClick: () -> Unit
@@ -43,14 +46,29 @@ fun KeyboardKey(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = text,
-                color = if (isActive) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+            when {
+                icon != null -> {
+                    Icon(
+                        painter = icon,
+                        contentDescription = null,
+                        tint = if (isActive) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
                 }
-            )
+                text != null -> {
+                    Text(
+                        text = text,
+                        color = if (isActive) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
         }
     }
 }
