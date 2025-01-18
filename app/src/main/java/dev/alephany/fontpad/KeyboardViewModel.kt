@@ -1,8 +1,11 @@
 package dev.alephany.fontpad
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.alephany.fontpad.clipboard.ClipboardManager
+import dev.alephany.fontpad.font.FontManager
 import dev.alephany.fontpad.state.ClipboardItem
+import dev.alephany.fontpad.state.FontData
 import dev.alephany.fontpad.state.KeyboardLayout
 import dev.alephany.fontpad.state.KeyboardState
 import dev.alephany.fontpad.state.ShiftState
@@ -11,19 +14,34 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel responsible for managing keyboard state and handling keyboard actions.
  */
 class KeyboardViewModel(
-    private val clipboardManager: ClipboardManager
+    private val clipboardManager: ClipboardManager,
+    private val fontManager: FontManager
 ) : ViewModel() {
 
     private val _keyboardState = MutableStateFlow(KeyboardState())
     val keyboardState: StateFlow<KeyboardState> = _keyboardState.asStateFlow()
 
     // Expose clipboard history as StateFlow
-    val clipboardHistory: StateFlow<List<ClipboardItem>> = clipboardManager.history
+    val clipboardHistory = clipboardManager.history
+
+    // Expose fonts as StateFlow with hot sharing
+    private val _fonts = MutableStateFlow<List<FontData>>(emptyList())
+    val fonts: StateFlow<List<FontData>> = _fonts.asStateFlow()
+
+    init {
+        // Collect font updates in viewModelScope
+        viewModelScope.launch {
+            fontManager.fonts.collect { updatedFonts ->
+                _fonts.value = updatedFonts
+            }
+        }
+    }
 
     fun handleAction(action: KeyboardAction) {
         when (action) {
@@ -58,6 +76,33 @@ class KeyboardViewModel(
             is KeyboardAction.DeleteFromClipboard -> {
                 clipboardManager.deleteFromHistory(action.content)
             }
+
+            KeyboardAction.ShowFontSelector -> {
+                _keyboardState.update { currentState ->
+                    currentState.copy(
+                        previousLayout = currentState.currentLayout,
+                        currentLayout = KeyboardLayout.FONT_SELECTOR
+                    )
+                }
+            }
+
+            KeyboardAction.HideFontSelector -> {
+                _keyboardState.update { currentState ->
+                    currentState.copy(
+                        currentLayout = currentState.previousLayout
+                    )
+                }
+            }
+
+            is KeyboardAction.SelectFont -> {
+                _keyboardState.update { currentState ->
+                    currentState.copy(
+                        selectedFontId = action.fontId,
+                        currentLayout = currentState.previousLayout
+                    )
+                }
+            }
+
             else -> { /* Other actions are handled by IME service */ }
         }
     }
@@ -116,6 +161,13 @@ class KeyboardViewModel(
 
     private fun switchLayout(layout: KeyboardLayout) {
         _keyboardState.update { it.copy(currentLayout = layout) }
+    }
+
+    fun refreshFonts() {
+        viewModelScope.launch {
+            // This will trigger the FontManager to reload fonts and emit a new value
+            fontManager.loadFonts()
+        }
     }
 
     fun resetState() {

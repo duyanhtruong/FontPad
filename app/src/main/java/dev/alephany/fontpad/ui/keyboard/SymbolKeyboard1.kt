@@ -20,7 +20,8 @@ internal fun SymbolKeyboard1(
     Column(modifier = modifier) {
         // Clipboard bezel
         KeyboardBezel(
-            onClipboardClick = { onAction(KeyboardAction.ShowClipboard) }
+            onClipboardClick = { onAction(KeyboardAction.ShowClipboard) },
+            onFontSelectorClick = { onAction(KeyboardAction.ShowFontSelector) }
         )
 
         // Number row (reused from alphabetic)

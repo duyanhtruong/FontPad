@@ -23,4 +23,9 @@ sealed interface KeyboardAction {
     data object ClearClipboard : KeyboardAction
     data class PasteFromClipboard(val text: String) : KeyboardAction
     data class DeleteFromClipboard(val content: String) : KeyboardAction
+
+    // Font selector actions
+    data object ShowFontSelector : KeyboardAction
+    data object HideFontSelector : KeyboardAction
+    data class SelectFont(val fontId: String) : KeyboardAction
 }

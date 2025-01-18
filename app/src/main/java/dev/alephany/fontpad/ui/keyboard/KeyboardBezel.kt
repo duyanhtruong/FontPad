@@ -21,6 +21,7 @@ import dev.alephany.fontpad.R
 @Composable
 internal fun KeyboardBezel(
     onClipboardClick: () -> Unit,
+    onFontSelectorClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,11 +33,23 @@ internal fun KeyboardBezel(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Clipboard button
         KeyboardKey(
             icon = painterResource(id = R.drawable.ic_clipboard),
             modifier = Modifier.size(48.dp),
             isSpecialKey = true,
             onClick = onClipboardClick
+        )
+
+        // Spacing between buttons
+        Spacer(modifier = Modifier.width(4.dp))
+
+        // Font selector button
+        KeyboardKey(
+            icon = painterResource(id = R.drawable.ic_font),
+            modifier = Modifier.size(48.dp),
+            isSpecialKey = true,
+            onClick = onFontSelectorClick
         )
 
         // Spacer to fill remaining width

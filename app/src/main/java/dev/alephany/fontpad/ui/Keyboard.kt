@@ -7,9 +7,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.alephany.fontpad.state.ClipboardItem
+import dev.alephany.fontpad.state.FontData
 import dev.alephany.fontpad.state.KeyboardLayout
 import dev.alephany.fontpad.state.ShiftState
 import dev.alephany.fontpad.ui.keyboard.AlphabeticKeyboard
+import dev.alephany.fontpad.ui.keyboard.ClipboardView
+import dev.alephany.fontpad.ui.keyboard.FontSelector
 import dev.alephany.fontpad.ui.keyboard.SymbolKeyboard1
 import dev.alephany.fontpad.ui.keyboard.SymbolKeyboard2
 
@@ -29,6 +32,8 @@ fun Keyboard(
     currentLayout: KeyboardLayout,
     shiftState: ShiftState,
     clipboardItems: List<ClipboardItem>,
+    fonts: List<FontData>,
+    selectedFontId: String?,
     onKeyClick: (String) -> Unit,
     onAction: (KeyboardAction) -> Unit,
     modifier: Modifier = Modifier
@@ -54,6 +59,14 @@ fun Keyboard(
                         onDismiss = {
                             onAction(KeyboardAction.HideClipboard)
                         }
+                    )
+                }
+                KeyboardLayout.FONT_SELECTOR -> {
+                    FontSelector(
+                        fonts = fonts,
+                        selectedFontId = selectedFontId,
+                        onFontSelected = { fontId -> onAction(KeyboardAction.SelectFont(fontId)) },
+                        onDismiss = { onAction(KeyboardAction.HideFontSelector) }
                     )
                 }
 

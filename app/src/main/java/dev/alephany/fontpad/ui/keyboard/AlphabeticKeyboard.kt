@@ -22,7 +22,8 @@ internal fun AlphabeticKeyboard(
     Column(modifier = modifier) {
         // Clipboard bezel
         KeyboardBezel(
-            onClipboardClick = { onAction(KeyboardAction.ShowClipboard) }
+            onClipboardClick = { onAction(KeyboardAction.ShowClipboard) },
+            onFontSelectorClick = { onAction(KeyboardAction.ShowFontSelector) }
         )
 
         // Number row
@@ -53,7 +54,7 @@ internal fun AlphabeticKeyboard(
             onSpecialKeyClick = { key -> onKeyClick(key) }
         )
 
-// Third row (Shift + ZXCVBNM + Backspace)
+        // Third row (Shift + ZXCVBNM + Backspace)
         KeyboardRow(
             keys = KeyboardMappings.Alphabetic.bottomRow.map { key ->
                 when {
@@ -64,7 +65,7 @@ internal fun AlphabeticKeyboard(
             },
             keyWeights = KeyboardMappings.Alphabetic.keyWeights,
             specialKeys = setOf("shift", "⌫"),
-            onKeyClick = onKeyClick,  // Add this line
+            onKeyClick = onKeyClick,
             activeKeys = if (shiftState != ShiftState.OFF) setOf("shift") else emptySet(),
             onSpecialKeyClick = { key ->
                 when (key) {

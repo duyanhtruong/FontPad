@@ -1,14 +1,18 @@
 package dev.alephany.fontpad
 
 import android.inputmethodservice.InputMethodService
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import dev.alephany.fontpad.clipboard.ClipboardManager
+import dev.alephany.fontpad.font.FontManager
 import dev.alephany.fontpad.state.ShiftState
 import dev.alephany.fontpad.ui.Keyboard
 import dev.alephany.fontpad.ui.KeyboardAction
@@ -20,34 +24,40 @@ import dev.alephany.fontpad.ui.KeyboardAction
 class ComposeIMEService : InputMethodService() {
 
     private val keyboardViewLifecycleOwner = KeyboardViewLifecycleOwner()
-    private lateinit var clipboardManager: ClipboardManager
-    private lateinit var viewModel: KeyboardViewModel
+    private val fontManager by lazy { FontManager(this) }
+    private val clipboardManager by lazy { ClipboardManager(this) }
+    private val viewModel by lazy { KeyboardViewModel(clipboardManager, fontManager) }
 
     override fun onCreate() {
         super.onCreate()
         keyboardViewLifecycleOwner.onCreate()
-
-        // Initialize clipboard manager first
-        clipboardManager = ClipboardManager(this)
-        // Then initialize ViewModel with clipboard manager
-        viewModel = KeyboardViewModel(clipboardManager)
     }
 
     override fun onCreateInputView(): View {
         val composeView = ComposeView(this)
 
-        // Attach the lifecycle owner to the decor view
+        // Ensure proper lifecycle attachment
         keyboardViewLifecycleOwner.attachToDecorView(window?.window?.decorView)
+        composeView.setViewTreeLifecycleOwner(keyboardViewLifecycleOwner)
 
         composeView.setContent {
             val keyboardState by viewModel.keyboardState.collectAsState()
             val clipboardItems by viewModel.clipboardHistory.collectAsState()
+            val fonts by viewModel.fonts.collectAsState()
+
+            // Force recomposition when fonts change
+            LaunchedEffect(fonts) {
+                // Optional: Add logging here to verify updates
+                Log.d("FontPad", "Fonts updated: ${fonts.size} fonts available")
+            }
 
             MaterialTheme {
                 Keyboard(
                     currentLayout = keyboardState.currentLayout,
                     shiftState = keyboardState.shiftState,
                     clipboardItems = clipboardItems,
+                    fonts = fonts,
+                    selectedFontId = keyboardState.selectedFontId,
                     onKeyClick = { text -> handleTextInput(text, keyboardState.shiftState) },
                     onAction = { action -> handleKeyboardAction(action) }
                 )
@@ -117,6 +127,13 @@ class ComposeIMEService : InputMethodService() {
             is KeyboardAction.DeleteFromClipboard -> {
                 viewModel.handleAction(action)
             }
+
+            // Font selection actions
+            KeyboardAction.ShowFontSelector,
+            KeyboardAction.HideFontSelector,
+            is KeyboardAction.SelectFont -> {
+                viewModel.handleAction(action)
+            }
         }
     }
 
@@ -124,6 +141,8 @@ class ComposeIMEService : InputMethodService() {
         super.onStartInputView(info, restarting)
         keyboardViewLifecycleOwner.onResume()
         viewModel.resetState()
+        // Explicitly request font list refresh
+        viewModel.refreshFonts()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {

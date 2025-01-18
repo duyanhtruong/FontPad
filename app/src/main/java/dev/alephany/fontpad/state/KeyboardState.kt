@@ -7,7 +7,8 @@ enum class KeyboardLayout {
     ALPHABETIC,      // Main QWERTY keyboard
     SYMBOL_1,        // First symbol page (@#$, etc.)
     SYMBOL_2,        // Math symbols (π√∆, etc.)
-    CLIPBOARD        // Clipboard history view
+    CLIPBOARD,       // Clipboard history view
+    FONT_SELECTOR       // Font selector view
 }
 
 /**
@@ -26,5 +27,6 @@ data class KeyboardState(
     val currentLayout: KeyboardLayout = KeyboardLayout.ALPHABETIC,
     val previousLayout: KeyboardLayout = KeyboardLayout.ALPHABETIC,  // Layout to return to after clipboard
     val shiftState: ShiftState = ShiftState.OFF,
-    val lastShiftPressTime: Long = 0L  // For detecting double-tap on shift
+    val lastShiftPressTime: Long = 0L,  // For detecting double-tap on shift
+    val selectedFontId: String? = null
 )
