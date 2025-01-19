@@ -89,12 +89,20 @@ class ComposeIMEService : InputMethodService() {
     private fun handleKeyboardAction(action: KeyboardAction) {
         when (action) {
             // Input connection actions
+            KeyboardAction.Backspace -> {
+                // Handle single backspace
+                deleteSelection()
+            }
+            KeyboardAction.StartBackspace -> {
+                // Start continuous backspace
+                viewModel.startRepeatingBackspace { deleteSelection() }
+            }
+            KeyboardAction.StopBackspace -> {
+                viewModel.stopRepeatingBackspace()
+            }
             is KeyboardAction.PasteFromClipboard -> {
                 currentInputConnection?.commitText(action.text, 1)
                 viewModel.handleAction(action)  // Switch back to previous layout
-            }
-            KeyboardAction.Backspace -> {
-                currentInputConnection?.deleteSurroundingText(1, 0)
             }
             KeyboardAction.Enter -> {
                 currentInputConnection?.sendKeyEvent(
@@ -134,6 +142,17 @@ class ComposeIMEService : InputMethodService() {
             is KeyboardAction.SelectFont -> {
                 viewModel.handleAction(action)
             }
+        }
+    }
+
+    private fun deleteSelection() {
+        // First try to delete any selected text
+        val selectedText = currentInputConnection?.getSelectedText(0)
+        if (!selectedText.isNullOrEmpty()) {
+            currentInputConnection?.commitText("", 1)
+        } else {
+            // If no text is selected, delete previous character
+            currentInputConnection?.deleteSurroundingText(1, 0)
         }
     }
 

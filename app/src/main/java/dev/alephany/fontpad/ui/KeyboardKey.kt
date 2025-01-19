@@ -1,5 +1,6 @@
 package dev.alephany.fontpad.ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
 /**
@@ -28,13 +30,27 @@ fun KeyboardKey(
     icon: Painter? = null,
     isSpecialKey: Boolean = false,
     isActive: Boolean = false,
+    onPress: () -> Unit = {},
+    onRelease: () -> Unit = {},
     onClick: () -> Unit
 ) {
     Surface(
         modifier = modifier
             .padding(4.dp)
-            .height(48.dp),
-        onClick = onClick,
+            .height(48.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        try {
+                            onPress()
+                            awaitRelease()
+                        } finally {
+                            onRelease()
+                        }
+                    },
+                    onTap = { onClick() }
+                )
+            },
         color = when {
             isActive -> MaterialTheme.colorScheme.primary
             isSpecialKey -> MaterialTheme.colorScheme.secondaryContainer

@@ -3,10 +3,8 @@ package dev.alephany.fontpad.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 /**
  * A row of keyboard keys that can handle both regular and special keys.
@@ -20,35 +18,43 @@ import androidx.compose.ui.unit.dp
  * @param onSpecialKeyClick Callback for when a special key is clicked
  */
 @Composable
-internal fun KeyboardRow(
+fun KeyboardRow(
     keys: List<String>,
+    onKeyClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyWeights: Map<String, Float> = emptyMap(),
     specialKeys: Set<String> = emptySet(),
     activeKeys: Set<String> = emptySet(),
-    onKeyClick: (String) -> Unit = {},
-    onSpecialKeyClick: (String) -> Unit = {}
+    onSpecialKeyClick: (String) -> Unit = {},
+    onSpecialKeyPress: (String) -> Unit = {},
+    onSpecialKeyRelease: (String) -> Unit = {}
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         keys.forEach { key ->
-            KeyboardKey(
-                text = key,
-                modifier = Modifier.weight(keyWeights[key] ?: 1f),
-                isSpecialKey = key in specialKeys,
-                isActive = key in activeKeys,
-                onClick = {
-                    if (key in specialKeys) {
-                        onSpecialKeyClick(key)
-                    } else {
-                        onKeyClick(key)
-                    }
-                }
-            )
+            val weight = keyWeights[key] ?: 1f
+            val isSpecial = key in specialKeys
+            val isActive = key in activeKeys
+
+            if (isSpecial) {
+                KeyboardKey(
+                    text = key,
+                    modifier = Modifier.weight(weight),
+                    isSpecialKey = true,
+                    isActive = isActive,
+                    onPress = { onSpecialKeyPress(key) },
+                    onRelease = { onSpecialKeyRelease(key) },
+                    onClick = { onSpecialKeyClick(key) }
+                )
+            } else {
+                KeyboardKey(
+                    text = key,
+                    modifier = Modifier.weight(weight),
+                    onClick = { onKeyClick(key) }
+                )
+            }
         }
     }
 }

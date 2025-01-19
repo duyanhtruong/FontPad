@@ -42,10 +42,16 @@ internal fun SymbolKeyboard2(
         KeyboardRow(
             keys = KeyboardMappings.Symbols.bottomSymbolRow2,
             keyWeights = KeyboardMappings.Symbols.keyWeights,
-            specialKeys = setOf("⌫"),
+            specialKeys = setOf("⌫"),  // Make sure backspace is properly marked as special
             onKeyClick = onKeyClick,
             onSpecialKeyClick = { key ->
                 if (key == "⌫") onAction(KeyboardAction.Backspace)
+            },
+            onSpecialKeyPress = { key ->
+                if (key == "⌫") onAction(KeyboardAction.StartBackspace)
+            },
+            onSpecialKeyRelease = { key ->
+                if (key == "⌫") onAction(KeyboardAction.StopBackspace)
             }
         )
 

@@ -41,22 +41,31 @@ internal fun SymbolKeyboard1(
         // Second symbol row
         KeyboardRow(
             keys = KeyboardMappings.Symbols.middleSymbolRow1,
+            keyWeights = KeyboardMappings.Symbols.keyWeights,
+            specialKeys = setOf("⌫"),  // Make sure the backspace key is marked as special
             onKeyClick = onKeyClick,
-            onSpecialKeyClick = { key -> onKeyClick(key) }
+            onSpecialKeyClick = { key ->
+                if (key == "⌫") onAction(KeyboardAction.Backspace)
+            },
+            onSpecialKeyPress = { key ->
+                if (key == "⌫") onAction(KeyboardAction.StartBackspace)
+            },
+            onSpecialKeyRelease = { key ->
+                if (key == "⌫") onAction(KeyboardAction.StopBackspace)
+            }
         )
 
         // Bottom row with actions
         KeyboardRow(
             keys = KeyboardMappings.Symbols.actionSymbolRow1,
             keyWeights = KeyboardMappings.Symbols.keyWeights,
-            specialKeys = setOf("ABC", "=\\<", "space", "enter", "⌫"),
+            specialKeys = setOf("ABC", "=\\<", "space", "enter"),
             onKeyClick = onKeyClick,
             onSpecialKeyClick = { key ->
                 when (key) {
                     "ABC" -> onAction(KeyboardAction.SwitchToAlphabetic)
                     "=\\<" -> onAction(KeyboardAction.SwitchToSymbols2)
                     "space" -> onAction(KeyboardAction.Space)
-                    "⌫" -> onAction(KeyboardAction.Backspace)
                     "enter" -> onAction(KeyboardAction.Enter)
                 }
             }

@@ -72,6 +72,16 @@ internal fun AlphabeticKeyboard(
                     "shift" -> onAction(KeyboardAction.Shift)
                     "⌫" -> onAction(KeyboardAction.Backspace)
                 }
+            },
+            onSpecialKeyPress = { key ->
+                when (key) {
+                    "⌫" -> onAction(KeyboardAction.StartBackspace)
+                }
+            },
+            onSpecialKeyRelease = { key ->
+                when (key) {
+                    "⌫" -> onAction(KeyboardAction.StopBackspace)
+                }
             }
         )
 
@@ -80,6 +90,7 @@ internal fun AlphabeticKeyboard(
             keys = KeyboardMappings.Alphabetic.actionRow,
             keyWeights = KeyboardMappings.Alphabetic.keyWeights,
             specialKeys = setOf("tab", "?123", "space", "enter"),
+            onKeyClick = onKeyClick,
             onSpecialKeyClick = { key ->
                 when (key) {
                     "tab" -> onAction(KeyboardAction.Tab)

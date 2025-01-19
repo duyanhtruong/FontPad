@@ -10,10 +10,13 @@ import dev.alephany.fontpad.state.KeyboardLayout
 import dev.alephany.fontpad.state.KeyboardState
 import dev.alephany.fontpad.state.ShiftState
 import dev.alephany.fontpad.ui.KeyboardAction
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -26,6 +29,8 @@ class KeyboardViewModel(
 
     private val _keyboardState = MutableStateFlow(KeyboardState())
     val keyboardState: StateFlow<KeyboardState> = _keyboardState.asStateFlow()
+
+    private var backspaceJob: Job? = null
 
     // Expose clipboard history as StateFlow
     val clipboardHistory = clipboardManager.history
@@ -41,6 +46,28 @@ class KeyboardViewModel(
                 _fonts.value = updatedFonts
             }
         }
+    }
+
+    fun startRepeatingBackspace(onDelete: () -> Unit) {
+        backspaceJob?.cancel()
+        backspaceJob = viewModelScope.launch {
+            // Initial delay before rapid deletion starts
+            delay(500)
+            while (isActive) {
+                onDelete()
+                delay(50) // Repeat interval
+            }
+        }
+    }
+
+    fun stopRepeatingBackspace() {
+        backspaceJob?.cancel()
+        backspaceJob = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopRepeatingBackspace()
     }
 
     fun handleAction(action: KeyboardAction) {

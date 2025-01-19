@@ -12,6 +12,9 @@ sealed interface KeyboardAction {
     data object Space : KeyboardAction
     data object Enter : KeyboardAction
 
+    data object StartBackspace : KeyboardAction
+    data object StopBackspace : KeyboardAction
+
     // Layout switching actions
     data object SwitchToSymbols : KeyboardAction
     data object SwitchToSymbols2 : KeyboardAction
