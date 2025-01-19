@@ -5,11 +5,16 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import dev.alephany.fontpad.clipboard.ClipboardManager
 import dev.alephany.fontpad.font.FontManager
@@ -22,7 +27,6 @@ import dev.alephany.fontpad.ui.KeyboardAction
  * Handles keyboard input, clipboard functionality, and manages keyboard state.
  */
 class ComposeIMEService : InputMethodService() {
-
     private val keyboardViewLifecycleOwner = KeyboardViewLifecycleOwner()
     private val fontManager by lazy { FontManager(this) }
     private val clipboardManager by lazy { ClipboardManager(this) }
@@ -36,6 +40,19 @@ class ComposeIMEService : InputMethodService() {
     override fun onCreateInputView(): View {
         val composeView = ComposeView(this)
 
+        // Make the window draw edge-to-edge
+        window?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+
+            // Get the WindowInsetsController
+            WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+                // Hide system bars in IME mode
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
+
         // Ensure proper lifecycle attachment
         keyboardViewLifecycleOwner.attachToDecorView(window?.window?.decorView)
         composeView.setViewTreeLifecycleOwner(keyboardViewLifecycleOwner)
@@ -47,7 +64,6 @@ class ComposeIMEService : InputMethodService() {
 
             // Force recomposition when fonts change
             LaunchedEffect(fonts) {
-                // Optional: Add logging here to verify updates
                 Log.d("FontPad", "Fonts updated: ${fonts.size} fonts available")
             }
 
@@ -59,12 +75,26 @@ class ComposeIMEService : InputMethodService() {
                     fonts = fonts,
                     selectedFontId = keyboardState.selectedFontId,
                     onKeyClick = { text -> handleTextInput(text, keyboardState.shiftState) },
-                    onAction = { action -> handleKeyboardAction(action) }
+                    onAction = { action -> handleKeyboardAction(action) },
+                    modifier = Modifier.navigationBarsPadding()
                 )
             }
         }
 
         return composeView
+    }
+
+    override fun onWindowShown() {
+        super.onWindowShown()
+        window?.window?.let { window ->
+            // Ensure IME window stays edge-to-edge when shown
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                hide(WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
     }
 
     /**
