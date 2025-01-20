@@ -26,7 +26,7 @@ internal fun FontSelector(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp),  // Match keyboard height
+            .height(240.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
@@ -49,42 +49,32 @@ internal fun FontSelector(
                 }
             }
 
-            if (fonts.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "No fonts available",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "Add fonts in Settings",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                // Default font option always present
+                item {
+                    FontItem(
+                        font = FontData(
+                            id = "",  // Empty string as ID for default font
+                            name = "Default Font",
+                            filePath = ""
+                        ),
+                        isSelected = selectedFontId == null,  // Selected when no font is selected
+                        onClick = { onFontSelected("") }  // Empty string to clear font selection
+                    )
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(fonts) { font ->
-                        FontItem(
-                            font = font,
-                            isSelected = font.id == selectedFontId,
-                            onClick = { onFontSelected(font.id) }
-                        )
-                    }
+
+                // Custom fonts
+                items(fonts) { font ->
+                    FontItem(
+                        font = font,
+                        isSelected = font.id == selectedFontId,
+                        onClick = { onFontSelected(font.id) }
+                    )
                 }
             }
         }
