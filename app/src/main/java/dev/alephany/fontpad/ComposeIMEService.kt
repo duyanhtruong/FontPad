@@ -21,9 +21,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import dev.alephany.fontpad.clipboard.ClipboardManager
+import dev.alephany.fontpad.data.ThemeDataStore
 import dev.alephany.fontpad.font.FontManager
 import dev.alephany.fontpad.state.FontData
 import dev.alephany.fontpad.state.ShiftState
+import dev.alephany.fontpad.state.ThemeState
 import dev.alephany.fontpad.ui.Keyboard
 import dev.alephany.fontpad.ui.KeyboardAction
 import java.io.File
@@ -66,7 +68,9 @@ class ComposeIMEService : InputMethodService() {
     private val keyboardViewLifecycleOwner = KeyboardViewLifecycleOwner()
     private val fontManager by lazy { FontManager(this) }
     private val clipboardManager by lazy { ClipboardManager(this) }
+    private val themeDataStore by lazy { ThemeDataStore(this) }
     private val viewModel by lazy { KeyboardViewModel(clipboardManager, fontManager) }
+
 
     override fun onCreate() {
         super.onCreate()
@@ -76,19 +80,6 @@ class ComposeIMEService : InputMethodService() {
     override fun onCreateInputView(): View {
         val composeView = ComposeView(this)
 
-        // Make the window draw edge-to-edge
-        window?.window?.let { window ->
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-
-            // Get the WindowInsetsController
-            WindowInsetsControllerCompat(window, window.decorView).let { controller ->
-                // Hide system bars in IME mode
-                controller.hide(WindowInsetsCompat.Type.systemBars())
-                controller.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        }
-
         // Ensure proper lifecycle attachment
         keyboardViewLifecycleOwner.attachToDecorView(window?.window?.decorView)
         composeView.setViewTreeLifecycleOwner(keyboardViewLifecycleOwner)
@@ -97,24 +88,20 @@ class ComposeIMEService : InputMethodService() {
             val keyboardState by viewModel.keyboardState.collectAsState()
             val clipboardItems by viewModel.clipboardHistory.collectAsState()
             val fonts by viewModel.fonts.collectAsState()
+            val themeState by themeDataStore.themeState.collectAsState(
+                initial = ThemeState()
+            )
 
-            // Force recomposition when fonts change
-            LaunchedEffect(fonts) {
-                Log.d("FontPad", "Fonts updated: ${fonts.size} fonts available")
-            }
-
-            MaterialTheme {
-                Keyboard(
-                    currentLayout = keyboardState.currentLayout,
-                    shiftState = keyboardState.shiftState,
-                    clipboardItems = clipboardItems,
-                    fonts = fonts,
-                    selectedFontId = keyboardState.selectedFontId,
-                    onKeyClick = { text -> handleTextInput(text, keyboardState.shiftState) },
-                    onAction = { action -> handleKeyboardAction(action) },
-                    modifier = Modifier.navigationBarsPadding()
-                )
-            }
+            Keyboard(
+                currentLayout = keyboardState.currentLayout,
+                shiftState = keyboardState.shiftState,
+                clipboardItems = clipboardItems,
+                fonts = fonts,
+                selectedFontId = keyboardState.selectedFontId,
+                keyboardTheme = themeState.keyboardTheme,
+                onKeyClick = { text -> handleTextInput(text, keyboardState.shiftState) },
+                onAction = { action -> handleKeyboardAction(action) }
+            )
         }
 
         return composeView

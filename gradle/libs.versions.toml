@@ -1,6 +1,7 @@
 [versions]
 accompanistSystemuicontrollerVersion = "0.32.0"
 agp = "8.8.0"
+datastorePreferencesCoreVersion = "1.1.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -15,10 +16,14 @@ material3 = "x.x.x"
 savedstate = "1.2.1"
 navigationRuntimeKtx = "2.8.5"
 navigationCompose = "2.8.5"
+datastoreCoreAndroidVersion = "1.1.2"
+datastorePreferencesCoreJvmVersion = "1.1.2"
 
 [libraries]
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesCoreVersion" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferencesCoreVersion" }
 androidx-lifecycle-runtime-ktx-android = { module = "androidx.lifecycle:lifecycle-runtime-ktx-android", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-runtime-ktx-v261 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
@@ -41,6 +46,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroidVersion" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvmVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

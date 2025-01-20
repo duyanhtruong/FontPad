@@ -2,13 +2,17 @@ package dev.alephany.fontpad.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.alephany.fontpad.state.ClipboardItem
 import dev.alephany.fontpad.state.FontData
 import dev.alephany.fontpad.state.KeyboardLayout
+import dev.alephany.fontpad.state.KeyboardTheme
 import dev.alephany.fontpad.state.ShiftState
 import dev.alephany.fontpad.ui.keyboard.AlphabeticKeyboard
 import dev.alephany.fontpad.ui.keyboard.ClipboardView
@@ -34,62 +38,71 @@ fun Keyboard(
     clipboardItems: List<ClipboardItem>,
     fonts: List<FontData>,
     selectedFontId: String?,
+    keyboardTheme: KeyboardTheme,
     onKeyClick: (String) -> Unit,
     onAction: (KeyboardAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column {
-            when (currentLayout) {
-                KeyboardLayout.CLIPBOARD -> {
-                    ClipboardView(
-                        items = clipboardItems,
-                        onPaste = { text ->
-                            onAction(KeyboardAction.PasteFromClipboard(text))
-                        },
-                        onDelete = { text ->
-                            onAction(KeyboardAction.DeleteFromClipboard(text))
-                        },
-                        onClear = {
-                            onAction(KeyboardAction.ClearClipboard)
-                        },
-                        onDismiss = {
-                            onAction(KeyboardAction.HideClipboard)
-                        }
-                    )
-                }
-                KeyboardLayout.FONT_SELECTOR -> {
-                    FontSelector(
-                        fonts = fonts,
-                        selectedFontId = selectedFontId,
-                        onFontSelected = { fontId -> onAction(KeyboardAction.SelectFont(fontId)) },
-                        onDismiss = { onAction(KeyboardAction.HideFontSelector) }
-                    )
-                }
+    val colorScheme = when (keyboardTheme) {
+        KeyboardTheme.DEFAULT -> lightColorScheme()
+        KeyboardTheme.DARK -> darkColorScheme()
+    }
 
-                KeyboardLayout.ALPHABETIC -> {
-                    AlphabeticKeyboard(
-                        shiftState = shiftState,
-                        onKeyClick = onKeyClick,
-                        onAction = onAction
-                    )
-                }
-
-                KeyboardLayout.SYMBOL_1 -> {
-                    SymbolKeyboard1(
-                        onKeyClick = onKeyClick,
-                        onAction = onAction
-                    )
-                }
-
-                KeyboardLayout.SYMBOL_2 -> {
-                    SymbolKeyboard2(
-                        onKeyClick = onKeyClick,
-                        onAction = onAction
-                    )
+    MaterialTheme(colorScheme = colorScheme) {
+        Surface(
+            modifier = modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column {
+                when (currentLayout) {
+                    KeyboardLayout.CLIPBOARD -> {
+                        ClipboardView(
+                            items = clipboardItems,
+                            onPaste = { text ->
+                                onAction(KeyboardAction.PasteFromClipboard(text))
+                            },
+                            onDelete = { text ->
+                                onAction(KeyboardAction.DeleteFromClipboard(text))
+                            },
+                            onClear = {
+                                onAction(KeyboardAction.ClearClipboard)
+                            },
+                            onDismiss = {
+                                onAction(KeyboardAction.HideClipboard)
+                            }
+                        )
+                    }
+                    KeyboardLayout.FONT_SELECTOR -> {
+                        FontSelector(
+                            fonts = fonts,
+                            selectedFontId = selectedFontId,
+                            onFontSelected = { fontId ->
+                                onAction(KeyboardAction.SelectFont(fontId))
+                            },
+                            onDismiss = { onAction(KeyboardAction.HideFontSelector) }
+                        )
+                    }
+                    KeyboardLayout.ALPHABETIC -> {
+                        AlphabeticKeyboard(
+                            shiftState = shiftState,
+                            onKeyClick = onKeyClick,
+                            onAction = onAction
+                        )
+                    }
+                    KeyboardLayout.SYMBOL_1 -> {
+                        SymbolKeyboard1(
+                            onKeyClick = onKeyClick,
+                            onAction = onAction
+                        )
+                    }
+                    KeyboardLayout.SYMBOL_2 -> {
+                        SymbolKeyboard2(
+                            onKeyClick = onKeyClick,
+                            onAction = onAction
+                        )
+                    }
                 }
             }
         }

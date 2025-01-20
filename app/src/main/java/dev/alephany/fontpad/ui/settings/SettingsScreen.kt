@@ -19,6 +19,7 @@ import dev.alephany.fontpad.R
 @Composable
 fun SettingsScreen(
     onNavigateToFontSettings: () -> Unit,
+    onNavigateToThemeSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -75,8 +76,8 @@ fun SettingsScreen(
                     isLastItem = index == settings.lastIndex,
                     onClick = {
                         when (item.title) {
+                            "Theme" -> onNavigateToThemeSettings()
                             "Font" -> onNavigateToFontSettings()
-                            // Other navigation handlers can be added here
                         }
                     }
                 )
